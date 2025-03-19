@@ -7,11 +7,11 @@ on:
 permissions: {}
 
 jobs:
-  build:
-    name: Build
+  build_poetry_plugin:
+    name: Build Poetry Plugin
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -34,17 +34,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: src/webui/package-lock.json
 
-      - name: Change directory to poetry plugin inspect path
-        run: cd src/poetry_plugin
-
       - name: Build Python project and front end
+        working-directory: ./src/poetry_plugin
         run: poetry build
 
       - name: Upload Python dist as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: python-dist
-          path: dist/*
+          path: ./src/poetry_plugin/dist/*
 
   upload-github:
     name: Upload (GitHub)
@@ -53,14 +51,14 @@ jobs:
       contents: write
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 
       - uses: actions/download-artifact@v4
         with:
           name: python-dist
-          path: dist/
+          path: ./src/poetry_plugin/dist/
 
       - run: gh release upload "${TAG_NAME}" dist/*.{tar.gz,whl}
         env:
@@ -80,7 +78,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: python-dist
-          path: dist/
+          path: ./src/poetry_plugin/dist/
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
