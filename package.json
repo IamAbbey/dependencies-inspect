@@ -1,0 +1,13 @@
+{
+  "name": "dependencies-inspect",
+  "license": "MIT",
+  "scripts": {
+    "webui:install": "cd src/webui && npm install",
+    "webui:dev": "cd src/webui && npm run dev",
+    "webui:build": "cd src/webui && npm run build",
+    "webui:lint": "cd src/webui && npm run lint",
+    "webui:format": "cd src/webui && npm run format",
+    "webui:clean": "cd src/webui && npm run clean",
+    "webui:type-check": "cd src/webui && npm run type-check"
+  }
+}

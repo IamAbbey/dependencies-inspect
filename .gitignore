@@ -1,0 +1,7 @@
+.tmp
+.vscode
+dist
+.DS_Store
+.python-version
+
+poetry_inspect_report
