@@ -1,0 +1,13 @@
+.mypy_cache
+.venv
+.python-version
+__pycache__
+.ruff_cache
+.pytest_cache
+
+
+.DS_Store
+.coverage
+htmlcov
+
+poetry_inspect_report
