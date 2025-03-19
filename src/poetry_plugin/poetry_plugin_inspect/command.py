@@ -87,9 +87,7 @@ class InspectPackageCommand(ShowCommand):
 
     def handle(self) -> int:
         if not Path(WEB_UI_BUILD_DIR).exists():
-            self.line_error(
-                "<error>Something went wrong!, Invalid Web UI build directory</error>"
-            )
+            self.line_error("<error>Something went wrong!</error>")
             return 1
 
         output_dir_name = self.option("output")
@@ -98,7 +96,7 @@ class InspectPackageCommand(ShowCommand):
             self.export(result, output_dir_name)
             self.line("Inspection Complete")
         except ValueError:
-            self.line_error("<error>Something went wrong!!!</error>")
+            self.line_error("<error>Something went wrong!</error>")
             return 1
 
         return 0

@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 # Used as a mock for latest git revision.
 MOCK_DEFAULT_GIT_REVISION = "9cf87a285a2d3fbb0b9fa621997b3acc3631ed24"
 FIXTURE_PATH = Path(__file__).parent / "fixtures"
+TEST_WEB_UI_BUILD_DIR = FIXTURE_PATH / "webui"
 
 
 class PoetryTestApplication(Application):

@@ -4,10 +4,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 from poetry.factory import Factory
-
+from poetry_plugin_inspect import command
 from poetry_plugin_inspect.command import DEFAULT_OUTPUT_DIR_NAME, PackageInfo
 from tests.helpers import (
     MOCK_DEFAULT_GIT_REVISION,
+    TEST_WEB_UI_BUILD_DIR,
     CommandTesterFactory,
     TestLocker,
     TestRepository,
@@ -104,10 +105,12 @@ def test_inspect_with_installed_packages(
         }
     )
 
+    mocker.patch.object(command, "WEB_UI_BUILD_DIR", TEST_WEB_UI_BUILD_DIR)
     export_mock = mocker.patch(
         "poetry_plugin_inspect.command.InspectPackageCommand.export"
     )
     tester.execute("--latest" if show_latest else "")
+    assert tester.status_code == 0
 
     expected = [
         PackageInfo(
@@ -228,10 +231,13 @@ def test_show_outdated_git_dev_dependency(
             },
         }
     )
+
+    mocker.patch.object(command, "WEB_UI_BUILD_DIR", TEST_WEB_UI_BUILD_DIR)
     export_mock = mocker.patch(
         "poetry_plugin_inspect.command.InspectPackageCommand.export"
     )
     tester.execute("--latest")
+    assert tester.status_code == 0
 
     expected = [
         PackageInfo(
@@ -343,10 +349,12 @@ def test_show_required_by_deps(
         }
     )
 
+    mocker.patch.object(command, "WEB_UI_BUILD_DIR", TEST_WEB_UI_BUILD_DIR)
     export_mock = mocker.patch(
         "poetry_plugin_inspect.command.InspectPackageCommand.export"
     )
     tester.execute("--latest")
+    assert tester.status_code == 0
 
     expected = [
         PackageInfo(
