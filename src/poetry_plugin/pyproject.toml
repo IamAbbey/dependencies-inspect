@@ -8,7 +8,7 @@ readme = "README.md"
 homepage = "https://github.com/iamabbey/dependency-inspect/src/poetry_plugin"
 repository = "https://github.com/iamabbey/dependency-inspect/src/poetry_plugin"
 keywords = ["poetry", "plugin", "show dependencies", "dependencies tree"]
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.9,<4.0"
 dynamic = [ "classifiers" ]
 
 dependencies = [
@@ -72,8 +72,8 @@ testpaths = ["tests"]
 
 
 [tool.mypy]
-files = "src, tests"
-mypy_path = "src"
+files = "poetry_plugin_inspect, tests"
+mypy_path = "poetry_plugin_inspect"
 strict = true
 exclude = [
     "tests/fixtures",
