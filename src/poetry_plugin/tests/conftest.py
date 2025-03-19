@@ -4,7 +4,7 @@ import os
 import shutil
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import pytest
 from cleo.io.null_io import NullIO
@@ -99,9 +99,9 @@ def project_factory(tmp_path: Path, repo: TestRepository) -> ProjectFactory:
     workspace = tmp_path
 
     def _factory(
-        name: str | None = None,
-        pyproject_content: str | None = None,
-        source: Path | None = None,
+        name: Optional[str] = None,
+        pyproject_content: Optional[str] = None,
+        source: Optional[Path] = None,
     ) -> Poetry:
         project_dir = workspace / f"poetry-fixture-{name}"
 
@@ -173,8 +173,8 @@ def command_tester_factory(
 ) -> CommandTesterFactory:
     def _tester(
         command: str,
-        poetry: Poetry | None = None,
-        environment: Env | None = None,
+        poetry: Optional[Poetry] = None,
+        environment: Optional[Env] = None,
     ) -> CommandTester:
         command_obj = app.find(command)
         tester = CommandTester(command_obj)

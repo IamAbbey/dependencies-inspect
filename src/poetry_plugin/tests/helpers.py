@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Optional, Protocol, Union
 
 from poetry.config.config import Config
 from poetry.console.application import Application
@@ -16,7 +16,7 @@ from poetry.repositories import Repository
 from poetry.repositories.exceptions import PackageNotFoundError
 
 if TYPE_CHECKING:
-    from typing import Any, Self
+    from typing import Any
 
     from cleo.testers.command_tester import CommandTester
     from poetry.core.constraints.version import Version
@@ -62,7 +62,7 @@ class TestLocker(Locker):
     def is_locked(self) -> bool:
         return self._locked
 
-    def locked(self, is_locked: bool = True) -> Self:
+    def locked(self, is_locked: bool = True) -> TestLocker:
         self._locked = is_locked
 
         return self
@@ -85,12 +85,15 @@ class TestLocker(Locker):
 
 
 def get_package(
-    name: str, version: str | Version, yanked: str | bool = False
+    name: str, version: Union[str, Version], yanked: Union[str, bool] = False
 ) -> Package:
     return Package(name, version, yanked=yanked)
 
 
 class TestRepository(Repository):
+    # class name begins 'Test': tell pytest that it does not contain testcases.
+    __test__ = False
+
     def find_packages(self, dependency: Dependency) -> list[Package]:
         packages = super().find_packages(dependency)
         if len(packages) == 0:
@@ -111,8 +114,8 @@ class CommandTesterFactory(Protocol):
     def __call__(
         self,
         command: str,
-        poetry: Poetry | None = None,
-        environment: Env | None = None,
+        poetry: Optional[Poetry] = None,
+        environment: Optional[Env] = None,
     ) -> CommandTester: ...
 
 
@@ -120,8 +123,8 @@ class ProjectFactory(Protocol):
     def __call__(
         self,
         name: str,
-        pyproject_content: str | None = None,
-        source: Path | None = None,
+        pyproject_content: Optional[str] = None,
+        source: Optional[Path] = None,
     ) -> Poetry: ...
 
 
@@ -138,7 +141,7 @@ def copy_path(source: Path, dest: Path) -> None:
 
 
 class MockDulwichRepo:
-    def __init__(self, root: Path | str, **__: Any) -> None:
+    def __init__(self, root: Union[Path, str], **__: Any) -> None:
         self.path = str(root)
 
     def head(self) -> bytes:
@@ -148,7 +151,7 @@ class MockDulwichRepo:
 def mock_clone(
     url: str,
     *_: Any,
-    source_root: Path | None = None,
+    source_root: Optional[Path] = None,
     **__: Any,
 ) -> MockDulwichRepo:
     # Checking source to determine which folder we need to copy

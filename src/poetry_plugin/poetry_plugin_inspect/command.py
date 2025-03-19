@@ -33,8 +33,8 @@ class PackageInfo(BaseModel):
     group: str
     description: str
     # a mapping of direct dependencies and their pretty constraints
-    dependencies: dict[str, str] | None = {}
-    required_by: list[str] | None = []
+    dependencies: Optional[dict[str, str]] = {}
+    required_by: Optional[list[str]] = []
 
     @computed_field  # type: ignore
     @property
