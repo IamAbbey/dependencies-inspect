@@ -61,6 +61,7 @@ jobs:
           path: ./src/poetry_plugin/dist/
 
       - run: gh release upload "${TAG_NAME}" dist/*.{tar.gz,whl}
+        working-directory: ./src/poetry_plugin
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ github.event.release.tag_name }}
@@ -83,3 +84,4 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@15c56dba361d8335944d31a2ecd17d700fc7bcbc # v1.12.2
         with:
           print-hash: true
+          packages-dir: ./src/poetry_plugin/dist/
