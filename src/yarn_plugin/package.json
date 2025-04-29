@@ -1,0 +1,52 @@
+{
+  "name": "yarn-plugin-inspect",
+  "version": "0.1.0",
+  "packageManager": "yarn@4.8.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@eslint/compat": "^1.2.3",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.23.0",
+    "@types/fs-extra": "^11",
+    "@types/node": "^22.0.0",
+    "@types/semver": "^7",
+    "@typescript-eslint/eslint-plugin": "^8.12.1",
+    "@typescript-eslint/parser": "^8.12.1",
+    "@vitest/coverage-v8": "3.1.2",
+    "@yarnpkg/builder": "^4.2.1",
+    "@yarnpkg/cli": "^4.9.1",
+    "@yarnpkg/fslib": "^3.1.2",
+    "@yarnpkg/libzip": "^3.2.1",
+    "@yarnpkg/plugin-link": "^3.0.1",
+    "@yarnpkg/plugin-pnp": "^4.1.0",
+    "eslint": "^9.23.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "rimraf": "5.0.0",
+    "typescript": "^5.5.2",
+    "vitest": "^3.1.2"
+  },
+  "dependencies": {
+    "@yarnpkg/core": "^4.4.1",
+    "clipanion": "^4.0.0-rc.4",
+    "fs-extra": "^11.3.0",
+    "semver": "^7.7.1",
+    "valibot": "^1.0.0"
+  },
+  "scripts": {
+    "build": "builder build plugin && npm run copy-asset",
+    "build:dev": "builder build plugin --no-minify",
+    "build-asset:dev": "builder build plugin --no-minify && npm run copy-asset",
+    "clean": "rimraf bundles",
+    "format": "prettier --write '**/**/*.{ts,js}'",
+    "ci-lint": "npm run lint && prettier --check '**/**/*.{ts,js}'",
+    "lint": "eslint './src/**/*.{ts,js}'",
+    "copy-asset": "node scripts/copy-asset.js",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  }
+}
