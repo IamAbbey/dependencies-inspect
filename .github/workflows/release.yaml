@@ -65,7 +65,7 @@ jobs:
       - run: npm run yarn_plugin:build
       - name: Update bundle
         working-directory: ./src/yarn_plugin
-        if: github.repository_owner == 'IamAbbey' && github.ref == 'refs/heads/main'
+        if: github.repository_owner == 'IamAbbey'
         run: |
           if [[ "$(git status --porcelain)" != "" ]]; then
             git config user.email "sotundeabiodun00+githubbot@gmail.com"
