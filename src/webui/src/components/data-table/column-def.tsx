@@ -129,7 +129,10 @@ export const columnsDefinition: ColumnDef<PackageInfoSchemaType>[] = [
       return (
         <p>
           {Array.isArray(vulnerabilities) && vulnerabilities.length >= 1 ? (
-            <TriangleAlert size={14} className="text-orange-500 dark:text-orange-300 opacity-70" />
+            <TriangleAlert
+              size={14}
+              className="text-orange-500 dark:text-orange-300 opacity-70"
+            />
           ) : (
             <></>
           )}

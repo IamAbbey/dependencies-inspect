@@ -32,7 +32,10 @@ export function NpmVulnerabilityList() {
                   <VLine label="Details" body={vulnerability.overview} />
                 )}
                 {vulnerability.recommendation && (
-                  <VLine label="Recommendation" body={vulnerability.recommendation} />
+                  <VLine
+                    label="Recommendation"
+                    body={vulnerability.recommendation}
+                  />
                 )}
                 <VLine label="Severity" body={vulnerability.severity} />
                 <VLine
