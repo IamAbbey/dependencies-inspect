@@ -96,8 +96,9 @@ jobs:
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 22.x
-          cache: 'npm'
-          cache-dependency-path: src/yarn_plugin/package-lock.json
+          cache: 'yarn'
+          cache-dependency-path: src/yarn_plugin/yarn.lock
+      - run: corepack enable
       - run: npm run yarn_plugin:install
       - run: npm run yarn_plugin:ci-lint
       - run: npm run yarn_plugin:test

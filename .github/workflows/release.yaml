@@ -58,8 +58,7 @@ jobs:
           node-version: 22.x
           cache: 'npm'
           cache-dependency-path: src/yarn_plugin/package-lock.json
-      - name: Enable corepack
-        run: corepack enable
+      - run: corepack enable
       - run: npm run yarn_plugin:install
       - run: npm run yarn_plugin:build
       - name: Update bundle
