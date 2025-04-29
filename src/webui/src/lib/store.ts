@@ -3,6 +3,7 @@ import {
   PackageInfoSchemaType,
   WebUIDataSchema,
   WebUIDataSchemaType,
+  TreeDataSchemaType,
 } from "./type";
 import { produce } from "immer";
 import { parse } from "valibot";
@@ -16,6 +17,8 @@ interface DashboardState {
   getPackageByName: (name: string) => PackageInfoSchemaType | undefined;
   setWebUIData: (data: WebUIDataSchemaType) => void;
   setShowDashboard: (showDashboard: boolean) => void;
+  getTableData: () => PackageInfoSchemaType[];
+  getTreeData: () => TreeDataSchemaType;
   fetchPackageInfo: () => void;
 }
 
@@ -23,8 +26,11 @@ const defaultWebUIData = {
   groups: [],
   top_level_packages: [],
   packages: [],
-  option: {
+  has_vulnerabilities: false,
+  config: {
     show_latest: true,
+    show_all: false,
+    package_manager: "",
   },
 } as WebUIDataSchemaType;
 
@@ -42,6 +48,36 @@ export const useDashboardStore = create<DashboardState>()((set, get) => ({
     ),
   getPackageByName: (name) => {
     return get().webUIData.packages.find((pkg) => pkg.name === name);
+  },
+  getTableData: () => {
+    const webUIData = get().webUIData;
+    const config = get().webUIData.config;
+    if (config.show_all) {
+      return webUIData.packages;
+    }
+    return webUIData.packages.filter((pkg) =>
+      webUIData.top_level_packages.includes(pkg.name),
+    );
+  },
+  getTreeData: () => {
+    const response = {} as TreeDataSchemaType;
+    const webUIData = get().webUIData;
+    const config = get().webUIData.config;
+    for (let index = 0; index < webUIData.packages.length; index++) {
+      const element = webUIData.packages[index];
+      const dependencies = Object.keys(element.dependencies);
+      response[element.name] = {
+        index: element.name,
+        children: dependencies,
+        data: {
+          title: element.name,
+          group: element.group,
+          isTopLevel: webUIData.top_level_packages.includes(element.name),
+        },
+        isFolder: dependencies.length > 0 && config.show_all,
+      };
+    }
+    return response;
   },
   setWebUIData: (data) =>
     set(

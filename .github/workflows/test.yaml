@@ -83,7 +83,26 @@ jobs:
 
       - name: Run pytest
         working-directory: ./src/poetry_plugin
-        run: poetry run pytest -v
+        run: poetry run pytest -v --cov --cov-fail-under=83
+
+  lint_typecheck_test_yarn_plugin:
+    name: Yarn Plugin Lint and Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: corepack enable
+      - name: Set Node.js 22.x
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 22.x
+          cache: 'yarn'
+          cache-dependency-path: src/yarn_plugin/yarn.lock
+      - run: npm run yarn_plugin:install
+      - run: npm run yarn_plugin:ci-lint
+      - run: npm run yarn_plugin:test
+      - run: npm run yarn_plugin:build
 
 
   lint_typecheck_test_webui:
@@ -100,6 +119,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: src/webui/package-lock.json
       - run: npm run webui:install
-      - run: npm run webui:lint
+      - run: npm run webui:ci-lint
       - run: npm run webui:type-check
       - run: npm run webui:build

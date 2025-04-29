@@ -6,7 +6,7 @@ import { columnsDefinition } from "./data-table/column-def";
 export function DependencyDashboard({
   className,
 }: React.ComponentProps<"div">) {
-  const data = useDashboardStore((state) => state.webUIData);
+  const getTableData = useDashboardStore((state) => state.getTableData);
 
   return (
     <div
@@ -15,7 +15,7 @@ export function DependencyDashboard({
     >
       <div className={cn("p-4 flex flex-col", className)}>
         <p className="text-base">Dependency Dashboard</p>
-        <DataTable data={data.packages} columns={columnsDefinition} />
+        <DataTable data={getTableData()} columns={columnsDefinition} />
       </div>
     </div>
   );

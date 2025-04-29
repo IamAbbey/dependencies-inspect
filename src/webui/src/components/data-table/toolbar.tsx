@@ -21,8 +21,12 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const groups = useDashboardStore((state) => state.webUIData.groups);
+  const config = useDashboardStore((state) => state.webUIData.config);
   const top_level_packages = useDashboardStore(
     (state) => state.webUIData.top_level_packages,
+  );
+  const has_vulnerabilities = useDashboardStore(
+    (state) => state.webUIData.has_vulnerabilities,
   );
 
   return (
@@ -64,10 +68,11 @@ export function DataTableToolbar<TData>({
         <DataTableViewOptions table={table} />
       </div>
       <div className="flex flex-wrap items-center gap-4">
-        {table.getColumn("name") && (
+        {table.getColumn("name") && config.show_all && (
           <div className="flex items-center space-x-2 cursor-pointer">
             <Checkbox
               id="show_top_level_package"
+              className="cursor-pointer"
               checked={
                 Array.isArray(table.getColumn("name")?.getFilterValue()) ??
                 false
@@ -82,16 +87,17 @@ export function DataTableToolbar<TData>({
             />
             <label
               htmlFor="show_top_level_package"
-              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
               Show Top Level Packages
             </label>
           </div>
         )}
         {table.getColumn("update_type") && (
-          <div className="flex items-center space-x-2 cursor-pointer">
+          <div className="flex items-center space-x-2">
             <Checkbox
               id="show_outdated_package"
+              className="cursor-pointer"
               checked={
                 (table.getColumn("update_type")?.getFilterValue() as boolean) ??
                 false
@@ -106,9 +112,35 @@ export function DataTableToolbar<TData>({
             />
             <label
               htmlFor="show_outdated_package"
-              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
               Show Outdated Packages
+            </label>
+          </div>
+        )}
+        {has_vulnerabilities && table.getColumn("vulnerabilities") && (
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show_vulnerable_package"
+              className="cursor-pointer"
+              checked={
+                (table
+                  .getColumn("vulnerabilities")
+                  ?.getFilterValue() as boolean) ?? false
+              }
+              onCheckedChange={(checked) => {
+                if (checked === true) {
+                  table.getColumn("vulnerabilities")?.setFilterValue(checked);
+                } else {
+                  table.getColumn("vulnerabilities")?.setFilterValue(false);
+                }
+              }}
+            />
+            <label
+              htmlFor="show_vulnerable_package"
+              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              Show Vulnerable Packages
             </label>
           </div>
         )}

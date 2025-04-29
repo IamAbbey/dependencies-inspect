@@ -1,17 +1,13 @@
-import { cn, usePypi } from "@/lib/utils";
+import { cn, SUPPORTED_PACKAGE_MANAGER } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VersionBadge } from "@/components/ui/version-badge";
-import {
-  SquareArrowOutUpRightIcon,
-  ChevronRight,
-  ChevronLeft,
-  ExternalLink,
-  LoaderCircle,
-} from "lucide-react";
+import { ChevronRight, ChevronLeft, TriangleAlert } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useDashboardStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PypiVulnerabilityList } from "./pypi-vulnerabilty";
+import { NpmVulnerabilityList } from "./npm-vulnerabilty";
 
 type SelectedPackageProps = {} & React.ComponentProps<"div">;
 
@@ -22,7 +18,7 @@ function InfoTab({ className }: SelectedPackageProps) {
   );
   const getPackageByName = useDashboardStore((state) => state.getPackageByName);
   const packages = useDashboardStore((state) => state.webUIData.packages);
-  const { pypiData } = usePypi(selectedPackage);
+  const config = useDashboardStore((state) => state.webUIData.config);
 
   return (
     <div className={cn("flex flex-col gap-2 mb-5", className)}>
@@ -47,7 +43,7 @@ function InfoTab({ className }: SelectedPackageProps) {
               )}
             >
               <p className="text-xs">{selectedPackage.latest_version ?? "?"}</p>
-              {selectedPackage.update_type !== "Up-to-date" &&
+              {selectedPackage.update_status === "update-possible" &&
                 selectedPackage.latest_version && <p>(❗)</p>}
             </Badge>
           </div>
@@ -78,24 +74,12 @@ function InfoTab({ className }: SelectedPackageProps) {
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <p className="opacity-70 text-xs">Package Metrics</p>
-            {pypiData && (
-              <div className="flex gap-2 items-center text-xs">
-                <a
-                  href={pypiData.info.project_url}
-                  target="_blank"
-                  className="text-primary font-mono font-light"
-                >
-                  {pypiData.info.project_url}
-                </a>
-                <SquareArrowOutUpRightIcon size={12} />
-              </div>
-            )}
           </div>
           <div className="flex flex-wrap gap-2 ">
             <div className="grow flex flex-col text-xs bg-secondary/80 rounded-md p-2 gap-1.5">
               <p className="opacity-70 font-light">Direct Dependencies</p>
-              <p className="font-semibold">
-                {Object.keys(selectedPackage.dependencies).length}
+              <p className="text-orange-400 font-semibold">
+                {Object.keys(selectedPackage.dependencies).length} copies
               </p>
             </div>
             <div className="grow flex flex-col text-xs bg-secondary/80 rounded-md p-2 gap-1.5">
@@ -106,17 +90,7 @@ function InfoTab({ className }: SelectedPackageProps) {
             </div>
             <div className="grow flex flex-col text-xs bg-secondary/80 rounded-md p-2 gap-1.5">
               <p className="opacity-70 font-light">License</p>
-              <p className="font-semibold whitespace-pre-line">
-                {pypiData && pypiData.info.license
-                  ? pypiData.info.license
-                  : "-"}
-              </p>
-            </div>
-            <div className="grow flex flex-col text-xs bg-secondary/80 rounded-md p-2 gap-1.5">
-              <p className="opacity-70 font-light">Direct Dependencies</p>
-              <p className="text-orange-400 font-semibold">
-                {Object.keys(selectedPackage.dependencies).length} copies
-              </p>
+              <p className="font-semibold whitespace-pre-line">{"-"}</p>
             </div>
           </div>
         </div>
@@ -135,7 +109,7 @@ function InfoTab({ className }: SelectedPackageProps) {
                   <li key={index} className="mb-1">
                     <span>{value}</span>
                     <span className="opacity-70">
-                      {pkg ? `@${pkg.current_version}` : "-"}
+                      {pkg ? `@${pkg.current_version}` : ""}
                     </span>
                   </li>
                 );
@@ -177,10 +151,12 @@ function InfoTab({ className }: SelectedPackageProps) {
                     />
                   </div>
                   <p className="grow">{dependency_name}</p>
-                  <div className="text-primary flex items-center gap-2">
-                    <p>View</p>
-                    <ChevronRight size={14} />
-                  </div>
+                  {config.show_all ? (
+                    <div className="text-primary flex items-center gap-2">
+                      <p>View</p>
+                      <ChevronRight size={14} />
+                    </div>
+                  ) : null}
                 </div>
               );
             },
@@ -192,67 +168,18 @@ function InfoTab({ className }: SelectedPackageProps) {
 }
 
 function VulnerabilityTab() {
-  const selectedPackage = useDashboardStore((state) => state.selectedPackage!);
-  const { pypiData, error, isLoading } = usePypi(selectedPackage);
+  const webUIConfig = useDashboardStore((state) => state.webUIData.config);
 
-  if (error) return <div>failed to load</div>;
-  if (isLoading) return <div>loading...</div>;
-
-  function VLine({
-    label,
-    body,
-    className,
-  }: { label: string; body: string } & React.ComponentProps<"div">) {
-    return (
-      <div className={cn("flex flex-col gap-1", className)}>
-        <p className="opacity-70 font-light">{label}</p>
-        <p className="whitespace-pre-line">{body}</p>
-      </div>
-    );
+  if (webUIConfig.package_manager == SUPPORTED_PACKAGE_MANAGER.POETRY) {
+    return <PypiVulnerabilityList />;
+  } else if (webUIConfig.package_manager == SUPPORTED_PACKAGE_MANAGER.YARN) {
+    return <NpmVulnerabilityList />;
   }
-
-  return (
-    <div className="flex flex-col gap-2 mb-5 text-xs">
-      {pypiData?.vulnerabilities.length == 0 ? (
-        <p className="opacity-70">No security vulnerabilities found.</p>
-      ) : (
-        pypiData?.vulnerabilities.map((vulnerability) => {
-          return (
-            <div className="px-2 py-4 bg-primary-foreground rounded-md flex gap-4 items-center">
-              <div className="grow flex flex-col gap-3">
-                {vulnerability.summary && (
-                  <VLine label="Summary" body={vulnerability.summary} />
-                )}
-                <VLine label="Details" body={vulnerability.details} />
-                <VLine
-                  label="Fixed in"
-                  body={vulnerability.fixed_in.join(", ")}
-                />
-                <VLine
-                  label="Aliases"
-                  body={vulnerability.aliases.join(", ")}
-                />
-              </div>
-              <div>
-                <a
-                  href={vulnerability.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <ExternalLink size={14} />
-                </a>
-              </div>
-            </div>
-          );
-        })
-      )}
-    </div>
-  );
+  return <></>;
 }
 export function SelectedPackage({ className }: SelectedPackageProps) {
   const selectedPackage = useDashboardStore((state) => state.selectedPackage);
   const setShowDashboard = useDashboardStore((state) => state.setShowDashboard);
-  const { pypiData, isLoading } = usePypi(selectedPackage);
 
   if (!selectedPackage) return <p>No selected package.</p>;
 
@@ -286,23 +213,24 @@ export function SelectedPackage({ className }: SelectedPackageProps) {
           <TabsList className="items-center w-full justify-start rounded-none border border-x-0 bg-transparent p-0">
             <TabsTrigger
               value="Info"
-              className="text-xs relative h-9 rounded-none border-b-2 border-t-1 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              className="cursor-pointer text-xs relative h-9 rounded-none border-b-2 border-t-1 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               Info
             </TabsTrigger>
             <TabsTrigger
               value="Vulnerability"
-              className="text-xs relative h-9 rounded-none border-b-2 border-t-1 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              className="cursor-pointer text-xs relative h-9 rounded-none border-b-2 border-t-1 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
-              Vulnerabilities (
-              {isLoading ? (
-                <LoaderCircle className="animate-spin" />
-              ) : pypiData ? (
-                pypiData.vulnerabilities.length
+              Vulnerabilities
+              {Array.isArray(selectedPackage.vulnerabilities) &&
+              selectedPackage.vulnerabilities.length >= 1 ? (
+                <TriangleAlert
+                  size={10}
+                  className="text-orange-500 dark:text-orange-300 opacity-70"
+                />
               ) : (
-                "?"
+                <></>
               )}
-              )
             </TabsTrigger>
           </TabsList>
           <div style={{ height: "80vh", overflowY: "auto" }}>

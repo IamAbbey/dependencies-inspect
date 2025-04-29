@@ -44,6 +44,34 @@ jobs:
           name: python-dist
           path: ./src/poetry_plugin/dist/*
 
+  build_yarn_plugin:
+    name: Build Yarn Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: corepack enable
+      - name: Set Node.js 22.x
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          cache-dependency-path: src/yarn_plugin/package-lock.json
+      - run: npm run yarn_plugin:install
+      - run: npm run yarn_plugin:build
+      - name: Update bundle
+        working-directory: ./src/yarn_plugin
+        if: github.repository_owner == 'IamAbbey' && github.ref == 'refs/heads/main'
+        run: |
+          if [[ "$(git status --porcelain)" != "" ]]; then
+            git config user.email "sotundeabiodun00+githubbot@gmail.com"
+            git config user.name "github-actions[bot]"
+            git commit -m 'Update bundles' bundles/@yarnpkg/
+            git push
+          fi
+
   upload-github:
     name: Upload (GitHub)
     runs-on: ubuntu-latest

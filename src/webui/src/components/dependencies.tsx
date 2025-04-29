@@ -88,6 +88,7 @@ export function Dependencies({ className }: DependenciesProps) {
 
 function TreeApp() {
   const webUIData = useDashboardStore((state) => state.webUIData);
+  const getTreeData = useDashboardStore((state) => state.getTreeData);
   const setSelectedPackage = useDashboardStore(
     (state) => state.setSelectedPackage,
   );
@@ -98,22 +99,7 @@ function TreeApp() {
 
   if (webUIData.packages.length == 0) return <p>No packages</p>;
 
-  const response: TreeDataSchemaType = {};
-
-  for (let index = 0; index < webUIData.packages.length; index++) {
-    const element = webUIData.packages[index];
-    const dependencies = Object.keys(element.dependencies);
-    response[element.name] = {
-      index: element.name,
-      children: dependencies,
-      data: {
-        title: element.name,
-        group: element.group,
-        isTopLevel: webUIData.top_level_packages.includes(element.name),
-      },
-      isFolder: dependencies.length > 0,
-    };
-  }
+  const response: TreeDataSchemaType = getTreeData();
 
   const items = {
     root: {
@@ -180,13 +166,13 @@ function TreeApp() {
               >
                 {arrow ? (
                   arrow
-                ) : (
+                ) : webUIData.config.show_all ? (
                   <Minus
                     className="inline-block"
                     color="transparent"
                     size={14}
                   />
-                )}
+                ) : null}
                 {title}
               </div>
             </li>

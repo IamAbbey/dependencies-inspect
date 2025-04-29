@@ -19,19 +19,43 @@ export const PackageInfoSchema = v.pipe(
     dependencies: v.record(v.string(), v.string()),
     required_by: v.array(v.string()),
     update_type: v.string(),
+    vulnerabilities: v.nullish(v.array(v.any())),
+    // semver-safe-update -> It needs an immediate semver-compliant upgrade
+    // update-possible -> It needs an upgrade but has potential BC breaks so is not urgent
+    update_status: v.nullish(
+      v.union([
+        v.literal("up-to-date"),
+        v.literal("semver-safe-update"),
+        v.literal("update-possible"),
+      ]),
+    ),
   }),
 );
 export type PackageInfoSchemaType = v.InferInput<typeof PackageInfoSchema>;
 
-export const WebUIDataSchema = v.object({
-  groups: v.array(v.string()),
-  top_level_packages: v.array(v.string()),
-  packages: v.array(PackageInfoSchema),
-  option: v.object({
-    show_latest: v.boolean(),
-  }),
+const WebUIConfig = v.object({
+  show_latest: v.boolean(),
+  show_all: v.boolean(),
+  package_manager: v.string(),
 });
-export type WebUIDataSchemaType = v.InferInput<typeof WebUIDataSchema>;
+
+export type WebUIConfigType = v.InferInput<typeof WebUIConfig>;
+
+export const WebUIDataSchema = v.pipe(
+  v.object({
+    groups: v.array(v.string()),
+    top_level_packages: v.array(v.string()),
+    packages: v.array(PackageInfoSchema),
+    config: WebUIConfig,
+  }),
+  v.transform((input) => ({
+    ...input,
+    has_vulnerabilities: input.packages.some(
+      (pkg) => pkg.vulnerabilities && pkg.vulnerabilities.length > 0,
+    ),
+  })),
+);
+export type WebUIDataSchemaType = v.InferOutput<typeof WebUIDataSchema>;
 
 type JsonData =
   | string
@@ -61,7 +85,7 @@ export const PypiVulnerabilitiesData = v.object({
   withdrawn: v.nullish(JsonSchema),
 });
 
-export const PypiJSONData = v.object({
+export const PypiJSONDataSchema = v.object({
   info: v.object({
     name: v.string(),
     summary: v.string(),
@@ -71,6 +95,26 @@ export const PypiJSONData = v.object({
   }),
   vulnerabilities: v.array(PypiVulnerabilitiesData),
 });
+export type PypiJSONDataSchemaType = v.InferInput<typeof PypiJSONDataSchema>;
+
+export const NpmVulnerabilitiesDataSchema = v.object({
+  cves: v.array(v.string()),
+  title: v.string(),
+  overview: v.nullish(v.string()),
+  recommendation: v.nullish(v.string()),
+  id: v.string(),
+  url: UrlSchema,
+  vulnerable_versions: v.string(),
+  severity: v.string(),
+});
+
+export const NpmJSONDataSchema = v.object({
+  vulnerabilities: v.array(NpmVulnerabilitiesDataSchema),
+});
+export type NpmVulnerabilitiesDataSchemaType = v.InferInput<
+  typeof NpmVulnerabilitiesDataSchema
+>;
+export type NpmJSONDataSchemaType = v.InferInput<typeof NpmJSONDataSchema>;
 
 export const TreeDataSchema = v.record(
   v.string(),

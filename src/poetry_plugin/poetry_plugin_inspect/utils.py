@@ -1,11 +1,15 @@
 import sys
 from packaging.version import parse
-from typing import Optional
+from typing import Optional, Literal
+
+UPDATE_TYPE = Literal[
+    "Major Update", "Minor Update", "Patch Update", "Up-to-date", "Unknown"
+]
 
 
 def compare_versions(
     current_version: Optional[str] = None, latest_version: Optional[str] = None
-) -> str:
+) -> UPDATE_TYPE:
     """Compare versions and determine update type: major, minor, or patch."""
 
     if current_version is None or latest_version is None:

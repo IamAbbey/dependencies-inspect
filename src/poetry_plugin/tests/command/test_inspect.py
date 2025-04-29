@@ -353,7 +353,7 @@ def test_show_required_by_deps(
     export_mock = mocker.patch(
         "poetry_plugin_inspect.command.InspectPackageCommand.export"
     )
-    tester.execute("--latest")
+    tester.execute("--latest --all")
     assert tester.status_code == 0
 
     expected = [
@@ -394,4 +394,127 @@ def test_show_required_by_deps(
             required_by=["cachy"],
         ),
     ]
+    export_mock.assert_called_once_with(expected, DEFAULT_OUTPUT_DIR_NAME)
+
+
+@pytest.mark.parametrize("show_all", [True, False])
+def test_report_top_level_by_default(
+    mocker: MockerFixture,
+    tester: CommandTester,
+    poetry: Poetry,
+    installed: Repository,
+    repo: TestRepository,
+    show_all: bool,
+) -> None:
+    poetry.package.add_dependency(Factory.create_dependency("cachy", "^0.2.0"))
+    poetry.package.add_dependency(Factory.create_dependency("pendulum", "2.0.0"))
+
+    cachy2 = get_package("cachy", "0.2.0")
+    cachy2.add_dependency(Factory.create_dependency("pytest", "^3.7.3"))
+
+    pendulum = get_package("pendulum", "2.0.0")
+    pendulum.add_dependency(Factory.create_dependency("cachy", "^0.2.0"))
+
+    pytest_373 = get_package("pytest", "3.7.3")
+
+    installed.add_package(cachy2)
+    installed.add_package(pendulum)
+    installed.add_package(pytest_373)
+
+    repo.add_package(cachy2)
+    repo.add_package(pendulum)
+    repo.add_package(pytest_373)
+
+    assert isinstance(poetry.locker, TestLocker)
+    poetry.locker.mock_lock_data(
+        {
+            "package": [
+                {
+                    "name": "cachy",
+                    "version": "0.2.0",
+                    "description": "",
+                    "optional": False,
+                    "platform": "*",
+                    "python-versions": "*",
+                    "checksum": [],
+                    "dependencies": {"pytest": "^3.7.3"},
+                },
+                {
+                    "name": "pendulum",
+                    "version": "2.0.0",
+                    "description": "Pendulum package",
+                    "optional": False,
+                    "platform": "*",
+                    "python-versions": "*",
+                    "checksum": [],
+                    "dependencies": {"cachy": ">=0.2.0 <0.3.0"},
+                },
+                {
+                    "name": "pytest",
+                    "version": "3.7.3",
+                    "description": "Pytest package",
+                    "optional": False,
+                    "platform": "*",
+                    "python-versions": "*",
+                    "checksum": [],
+                },
+            ],
+            "metadata": {
+                "python-versions": "*",
+                "platform": "*",
+                "content-hash": "123456789",
+                "files": {"cachy": [], "pendulum": [], "pytest": []},
+            },
+        }
+    )
+
+    mocker.patch.object(command, "WEB_UI_BUILD_DIR", TEST_WEB_UI_BUILD_DIR)
+    export_mock = mocker.patch(
+        "poetry_plugin_inspect.command.InspectPackageCommand.export"
+    )
+    tester.execute("--latest --all" if show_all else "--latest")
+    assert tester.status_code == 0
+
+    expected = [
+        PackageInfo(
+            name="cachy",
+            current_version="0.2.0",
+            latest_version="0.2.0",
+            update_status="up-to-date",
+            installed_status="installed",
+            compatible=True,
+            group="main",
+            description="",
+            dependencies={"pytest": "^3.7.3"},
+            required_by=["pendulum"],
+        ),
+        PackageInfo(
+            name="pendulum",
+            current_version="2.0.0",
+            latest_version="2.0.0",
+            update_status="up-to-date",
+            installed_status="installed",
+            compatible=True,
+            group="main",
+            description="Pendulum package",
+            dependencies={"cachy": ">=0.2.0 <0.3.0"},
+            required_by=[],
+        ),
+    ]
+
+    if show_all:
+        expected.append(
+            PackageInfo(
+                name="pytest",
+                current_version="3.7.3",
+                latest_version="3.7.3",
+                update_status="up-to-date",
+                installed_status="installed",
+                compatible=True,
+                group="dependencies",
+                description="Pytest package",
+                dependencies={},
+                required_by=["cachy"],
+            )
+        )
     export_mock.assert_called_once_with(expected, DEFAULT_OUTPUT_DIR_NAME)
