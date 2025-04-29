@@ -70,7 +70,7 @@ jobs:
           if [[ "$(git status --porcelain)" != "" ]]; then
             git config user.email "sotundeabiodun00+githubbot@gmail.com"
             git config user.name "github-actions[bot]"
-            git commit -m 'Update bundles' bundles/@yarnpkg/
+            git commit -m '(yarn) Update bundles' bundles/@yarnpkg/**
             git push
           fi
 

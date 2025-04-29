@@ -159,3 +159,19 @@ export function getPackageAudit(
     headers: { "Content-Type": "application/json" },
   });
 }
+
+export const REMOTE_WEBUI_ARTIFACT_URL =
+  "https://raw.githubusercontent.com/IamAbbey/dependencies-inspect/refs/heads/main/src/yarn_plugin/bundles/%40yarnpkg/webui/index.html";
+
+export async function downloadUIArtifact(url: string) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Something went wrong`);
+    }
+
+    return await res.text();
+  } catch (err) {
+    throw new Error(`Something went wrong: ${err}`);
+  }
+}

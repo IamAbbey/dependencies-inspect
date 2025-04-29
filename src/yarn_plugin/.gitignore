@@ -16,7 +16,6 @@ node_modules
 #!.yarn/cache
 .pnp.*
 
-bundles/
 .yarn
 .vscode
 poetry_inspect_report

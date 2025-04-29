@@ -29,7 +29,7 @@ async function buildFrontend() {
 }
 
 const sourceDir = path.resolve(__dirname, "../../webui/dist/"); // Adjust path if needed
-const destDir = path.resolve(__dirname, "../bundles/@yarnpkg/webui/dist/"); // Output location
+const destDir = path.resolve(__dirname, "../bundles/@yarnpkg/webui/"); // Output location
 
 async function copyFile() {
   try {

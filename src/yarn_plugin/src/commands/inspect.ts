@@ -33,8 +33,10 @@ import {
   GroupedDescriptor,
 } from "../types";
 import {
+  downloadUIArtifact,
   getDependencyGroup,
   getPackageAudit,
+  REMOTE_WEBUI_ARTIFACT_URL,
   reverseDep,
   stdoutLink,
   storedPackageDescriptorMap,
@@ -48,9 +50,10 @@ import { fetchDescriptorFrom } from "../suggestUtil";
 const PACKAGE_MANAGER = "yarn";
 const BASE_DIR = resolve(__dirname);
 const DEFAULT_OUTPUT_DIR_NAME = "poetry_inspect_report";
+const DEFAULT_WEB_UI_BUILD_DIR = join(BASE_DIR, "webui");
 const WEB_UI_BUILD_DIR = process.env.WEB_UI_BUILD_DIR
   ? process.env.WEB_UI_BUILD_DIR
-  : join(BASE_DIR, "webui", "dist");
+  : DEFAULT_WEB_UI_BUILD_DIR;
 
 export class Inspector {
   constructor(
@@ -81,6 +84,7 @@ export class Inspector {
         show_all: this.options.showAll,
       }),
     });
+    report.reportInfo(null, `${Mark.Check} Writing report to file...`);
 
     try {
       const cwdOutputDir = join(projectCwd, this.options.outputDir);
@@ -89,7 +93,22 @@ export class Inspector {
       // Remove the existing output directory (if it exists) and copy new files
       await fs.remove(cwdOutputDir);
 
-      await fs.copy(WEB_UI_BUILD_DIR, cwdOutputDir, { overwrite: true });
+      try {
+        await fs.access(WEB_UI_BUILD_DIR);
+        await fs.copy(WEB_UI_BUILD_DIR, cwdOutputDir, { overwrite: true });
+      } catch {
+        // we download artifact
+        const UIHtml = await downloadUIArtifact(REMOTE_WEBUI_ARTIFACT_URL);
+        try {
+          await fs.access(cwdOutputDir);
+        } catch {
+          // Ensure the directory exists
+          await fs.mkdir(cwdOutputDir, { recursive: true });
+        }
+
+        // Write the file
+        await fs.writeFile(indexFile, UIHtml, "utf-8");
+      }
 
       // Modify the index file
       const tempFile = indexFile + ".tmp";
@@ -468,7 +487,7 @@ export default class InspectCommand extends Command<CommandContext> {
           workspace,
         );
 
-        inspector.createReport(
+        await inspector.createReport(
           parse(array(PackageInfoSchema), packages),
           topLevelDependencies,
           project.cwd,
