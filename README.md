@@ -15,6 +15,9 @@ Dependencies inspect provides an easy to use dependencies inspector for common d
 ## Supported dependency management tools
 - [x] Poetry (Python)
     - [README](/src/poetry_plugin/README.md)
+    - [CHANGELOG](/src/poetry_plugin/CHANGELOG.md)
+- [x] Yarn (JavaScript)
+    - [README](/src/yarn_plugin/README.md)
+    - [CHANGELOG](/src/yarn_plugin/CHANGELOG.md)
 - [ ] NPM (JavaScript)
 - [ ] Uv (Python)
-- [ ] Yarn (JavaScript)
