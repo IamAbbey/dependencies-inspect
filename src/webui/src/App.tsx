@@ -12,7 +12,7 @@ function App() {
   const fetchPackageInfo = useDashboardStore((state) => state.fetchPackageInfo);
   const showDashboard = useDashboardStore((state) => state.showDashboard);
   const showData = useDashboardStore((state) => state.showData);
-  const option = useDashboardStore((state) => state.webUIData.option);
+  const webUIConfig = useDashboardStore((state) => state.webUIData.config);
 
   useEffect(() => {
     fetchPackageInfo();
@@ -32,10 +32,13 @@ function App() {
         </div>
         <ModeToggle />
       </div>
-      {!option.show_latest && (
+      {!webUIConfig.show_latest && (
         <div className="flex flex-wrap border italic border-b-0 bg-secondary justify-center text-xs p-1">
           <p>
-            Use <span className="font-extrabold">poetry inspect --latest</span>{" "}
+            Use{" "}
+            <span className="font-extrabold">
+              {webUIConfig.package_manager} inspect --latest
+            </span>{" "}
             to see latest version and available updates
           </p>
         </div>

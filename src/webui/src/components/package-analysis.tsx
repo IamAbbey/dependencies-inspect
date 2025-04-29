@@ -1,4 +1,4 @@
-import { cn, usePypi } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Bullet } from "@/components/ui/bullet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -26,7 +26,6 @@ type PackageAnalysisProps = {} & React.ComponentProps<"div">;
 export function PackageAnalysis({ className }: PackageAnalysisProps) {
   const selectedPackage = useDashboardStore((state) => state.selectedPackage);
   const showDashboard = useDashboardStore((state) => state.showDashboard);
-  const { pypiData } = usePypi(selectedPackage);
 
   return (
     <div className={cn(className)}>
@@ -82,11 +81,7 @@ export function PackageAnalysis({ className }: PackageAnalysisProps) {
               <div className="text-xs border border-background/60 rounded-md dark:bg-background/60 p-2 flex flex-col gap-2">
                 <p className="font-light text-xs">Author</p>
                 <div className="flex justify-between text-xs">
-                  <p className="font-mono font-light">
-                    {pypiData && pypiData.info.author
-                      ? pypiData.info.author
-                      : "-"}
-                  </p>
+                  <p className="font-mono font-light">{"-"}</p>
                 </div>
               </div>
             </div>

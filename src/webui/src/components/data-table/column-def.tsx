@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Package } from "lucide-react";
+import { ArrowUpDown, Package, TriangleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PackageInfoSchemaType } from "@/lib/type";
@@ -120,5 +120,30 @@ export const columnsDefinition: ColumnDef<PackageInfoSchemaType>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
+  },
+  {
+    accessorKey: "vulnerabilities",
+    header: () => <></>,
+    cell: ({ row }) => {
+      const vulnerabilities = row.getValue("vulnerabilities");
+      return (
+        <p>
+          {Array.isArray(vulnerabilities) && vulnerabilities.length >= 1 ? (
+            <TriangleAlert size={14} className="text-orange-500 dark:text-orange-300 opacity-70" />
+          ) : (
+            <></>
+          )}
+        </p>
+      );
+    },
+    filterFn: (row, id, value) => {
+      const vulnerabilities = row.getValue(id);
+      if (value === true) {
+        return Array.isArray(vulnerabilities) && vulnerabilities.length >= 1;
+      }
+      return true;
+    },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];
