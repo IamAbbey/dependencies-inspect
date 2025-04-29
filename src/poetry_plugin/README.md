@@ -36,6 +36,9 @@ poetry inspect
 ```
 
 ### Available options
+- `--output (o)`: Specify name of the output folder (optional)
 - `--latest (l)`: Show the latest version.
+- `--all (a)`: Apply options to all packages, including transitive dependencies.
+- `--vulnerability (x)`: audit packages and report vulnerabilities.
 - `--with`: The optional dependency groups to include.
 - `--without`: The dependency groups to ignore.
